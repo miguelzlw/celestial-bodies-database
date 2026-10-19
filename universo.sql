@@ -492,6 +492,30 @@ ALTER TABLE ONLY public.star
 
 
 --
+-- Name: idx_star_galaxy_id; Type: INDEX; Schema: public; Owner: freecodecamp
+--
+
+-- Performance Optimization: Index foreign key star(galaxy_id) to eliminate sequential scans during joins and lookups
+CREATE INDEX idx_star_galaxy_id ON public.star USING btree (galaxy_id);
+
+
+--
+-- Name: idx_planet_star_id; Type: INDEX; Schema: public; Owner: freecodecamp
+--
+
+-- Performance Optimization: Index foreign key planet(star_id) to eliminate sequential scans during joins and lookups
+CREATE INDEX idx_planet_star_id ON public.planet USING btree (star_id);
+
+
+--
+-- Name: idx_moon_planet_id; Type: INDEX; Schema: public; Owner: freecodecamp
+--
+
+-- Performance Optimization: Index foreign key moon(planet_id) to eliminate sequential scans during joins and lookups
+CREATE INDEX idx_moon_planet_id ON public.moon USING btree (planet_id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
