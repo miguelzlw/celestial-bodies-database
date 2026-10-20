@@ -59,7 +59,8 @@ describe('SUBTASKS 1.1', async () => {
   });
 
   it(':3 All tables should have a primary key', async () => {
-    const queryPrimaryKeys = `SELECT c.column_name, c.ordinal_position FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.constraint_type = 'PRIMARY KEY'`;
+    // Optimization: Filter by public schema to prevent querying system catalog keys and returning unnecessary rows
+    const queryPrimaryKeys = `SELECT c.column_name, c.ordinal_position FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.constraint_type = 'PRIMARY KEY' AND c.table_schema = 'public'`;
     const queryTables = `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name`;
     const primaryKeysRes = await client.query(queryPrimaryKeys);
     const tablesRes = await client.query(queryTables);
@@ -73,7 +74,8 @@ describe('SUBTASKS 1.1', async () => {
   });
 
   it(':4 All primary keys should automatically increment', async () => {
-    const queryPrimaryKeys = `SELECT c.table_name, c.column_name FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.constraint_type = 'PRIMARY KEY'`;
+    // Optimization: Filter by public schema to restrict primary key lookup to application tables
+    const queryPrimaryKeys = `SELECT c.table_name, c.column_name FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.constraint_type = 'PRIMARY KEY' AND c.table_schema = 'public'`;
     const queryColumns = `SELECT table_name, column_name, column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = 'public'`;
     const primaryKeysRes = await client.query(queryPrimaryKeys);
     const columnsRes = await client.query(queryColumns);
@@ -103,7 +105,8 @@ describe('SUBTASKS 1.1', async () => {
   });
 
   it(':6 "INT" data type should be used on two columns that aren\'t a key', async () => {
-    const queryKeys = `SELECT c.column_name, c.table_name FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.constraint_type = 'PRIMARY KEY' OR t.constraint_type = 'FOREIGN KEY'`;
+    // Optimization: Scope constraint search to public schema to reduce row count and loop iterations
+    const queryKeys = `SELECT c.column_name, c.table_name FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE (t.constraint_type = 'PRIMARY KEY' OR t.constraint_type = 'FOREIGN KEY') AND c.table_schema = 'public'`;
     const queryIntegerColumns = `SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_schema = 'public' AND data_type = 'integer'`;
     const keysRes = await client.query(queryKeys);
     const integerColumnsRes = await client.query(queryIntegerColumns);
@@ -315,7 +318,8 @@ describe('SUBTASKS 1.1', async () => {
   });
 
   it(':21 At least one column in each table should have the "UNIQUE" constraint', async () => {
-    const queryUniqueColumns = `SELECT c.column_name, c.table_name FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.constraint_type = 'UNIQUE'`;
+    // Optimization: Filter unique constraint query to public schema to avoid fetching system unique constraints
+    const queryUniqueColumns = `SELECT c.column_name, c.table_name FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.constraint_type = 'UNIQUE' AND c.table_schema = 'public'`;
     const queryTables = `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name`;
     const uniqueColumnsRes = await client.query(queryUniqueColumns);
     const tablesRes = await client.query(queryTables);
@@ -347,7 +351,8 @@ describe('SUBTASKS 1.1', async () => {
   });
 
   it(':23 Each primary key should have the correct naming convention', async () => {
-    const queryPrimaryKeys = `SELECT c.column_name, c.table_name FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.constraint_type = 'PRIMARY KEY'`;
+    // Optimization: Restrict primary key check to public schema to prevent checking non-conforming system tables
+    const queryPrimaryKeys = `SELECT c.column_name, c.table_name FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.constraint_type = 'PRIMARY KEY' AND c.table_schema = 'public'`;
     const primaryKeysRes = await client.query(queryPrimaryKeys);
 
     if (!primaryKeysRes) assert(false);
@@ -360,7 +365,8 @@ describe('SUBTASKS 1.1', async () => {
   });
 
   it(':24 Each foreign key column should share a name with the column it is referencing', async () => {
-    const queryForeignKeys = `SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name AS foreign_table_name, ccu.column_name AS foreign_column_name FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name WHERE constraint_type = 'FOREIGN KEY'`;
+    // Optimization: Restrict foreign key query to public schema
+    const queryForeignKeys = `SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name AS foreign_table_name, ccu.column_name AS foreign_column_name FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name WHERE constraint_type = 'FOREIGN KEY' AND tc.table_schema = 'public'`;
     const foreignKeysRes = await client.query(queryForeignKeys);
 
     if (!foreignKeysRes) assert(false);
