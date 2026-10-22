@@ -1,0 +1,3 @@
+## 2025-05-18 - Missing Foreign Key Indexes on Relational Database Dumps
+**Learning:** In relational database schemas (like PostgreSQL), creating foreign key constraints does not automatically create indexes on the referencing columns. Queries involving `JOIN` operations across related tables (e.g., `star JOIN galaxy ON star.galaxy_id = galaxy.galaxy_id`) or `CASCADE` deletions perform full table / sequential scans (O(N)) unless explicit B-tree indexes are created on foreign key columns, which reduces lookup time to O(log N).
+**Action:** Always check schema files and database dumps for foreign key columns lacking explicit indexes and add `CREATE INDEX` statements for high-frequency JOIN attributes.
