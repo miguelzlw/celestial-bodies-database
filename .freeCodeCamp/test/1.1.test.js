@@ -110,13 +110,12 @@ describe('SUBTASKS 1.1', async () => {
 
     if (!keysRes || !integerColumnsRes) assert(false);
     
+    // Bolt Optimization: Replace O(N * M) inner loop Array.prototype.find scan with O(1) Set lookup
+    // reducing lookup time complexity from O(N * M) to O(N + M)
+    const keySet = new Set(keysRes.rows.map(keyRow => `${keyRow.table_name}:${keyRow.column_name}`));
     let intKeys = 0;
     integerColumnsRes.rows.forEach(intRow => {
-      const isIntKey = keysRes.rows.find(keyRow => {
-        return (intRow.table_name == keyRow.table_name) && (intRow.column_name == keyRow.column_name);
-      });
-
-      if(isIntKey) {
+      if (keySet.has(`${intRow.table_name}:${intRow.column_name}`)) {
         intKeys++;
       }
     });
