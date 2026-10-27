@@ -492,6 +492,17 @@ ALTER TABLE ONLY public.star
 
 
 --
+-- Performance Optimization: Indexes on foreign key columns
+-- PostgreSQL does not automatically create indexes on foreign key columns.
+-- Adding B-tree indexes accelerates JOIN queries and FK validation lookups.
+--
+
+CREATE INDEX idx_star_galaxy_id ON public.star USING btree (galaxy_id);
+CREATE INDEX idx_planet_star_id ON public.planet USING btree (star_id);
+CREATE INDEX idx_moon_planet_id ON public.moon USING btree (planet_id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
