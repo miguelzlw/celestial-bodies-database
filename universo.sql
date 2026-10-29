@@ -460,13 +460,6 @@ ALTER TABLE ONLY public.star
 
 
 --
--- Name: star fk_galaxy; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
---
-
-ALTER TABLE ONLY public.star
-    ADD CONSTRAINT fk_galaxy FOREIGN KEY (galaxy_id) REFERENCES public.galaxy(galaxy_id);
-
-
 --
 -- Name: moon moon_planet_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
 --
@@ -489,6 +482,31 @@ ALTER TABLE ONLY public.planet
 
 ALTER TABLE ONLY public.star
     ADD CONSTRAINT star_galaxy_id_fkey FOREIGN KEY (galaxy_id) REFERENCES public.galaxy(galaxy_id);
+
+
+--
+-- Performance Optimizations: Foreign Key Indexes
+--
+
+--
+-- Name: moon_planet_id_idx; Type: INDEX; Schema: public; Owner: freecodecamp
+--
+
+CREATE INDEX moon_planet_id_idx ON public.moon USING btree (planet_id);
+
+
+--
+-- Name: planet_star_id_idx; Type: INDEX; Schema: public; Owner: freecodecamp
+--
+
+CREATE INDEX planet_star_id_idx ON public.planet USING btree (star_id);
+
+
+--
+-- Name: star_galaxy_id_idx; Type: INDEX; Schema: public; Owner: freecodecamp
+--
+
+CREATE INDEX star_galaxy_id_idx ON public.star USING btree (galaxy_id);
 
 
 --
