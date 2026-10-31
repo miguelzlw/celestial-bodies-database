@@ -460,13 +460,6 @@ ALTER TABLE ONLY public.star
 
 
 --
--- Name: star fk_galaxy; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
---
-
-ALTER TABLE ONLY public.star
-    ADD CONSTRAINT fk_galaxy FOREIGN KEY (galaxy_id) REFERENCES public.galaxy(galaxy_id);
-
-
 --
 -- Name: moon moon_planet_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
 --
@@ -489,6 +482,18 @@ ALTER TABLE ONLY public.planet
 
 ALTER TABLE ONLY public.star
     ADD CONSTRAINT star_galaxy_id_fkey FOREIGN KEY (galaxy_id) REFERENCES public.galaxy(galaxy_id);
+
+
+--
+-- Performance Optimizations: Indexes on Foreign Key Columns
+-- PostgreSQL does not automatically create indexes on foreign key columns.
+-- Adding explicit B-Tree indexes optimizes JOIN query performance and FK validation lookups
+-- from O(N) sequential table scans to O(log N) index lookups.
+--
+
+CREATE INDEX idx_star_galaxy_id ON public.star USING btree (galaxy_id);
+CREATE INDEX idx_planet_star_id ON public.planet USING btree (star_id);
+CREATE INDEX idx_moon_planet_id ON public.moon USING btree (planet_id);
 
 
 --
