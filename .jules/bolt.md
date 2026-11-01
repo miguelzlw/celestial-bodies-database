@@ -1,0 +1,4 @@
+## 2026-10-12 - Redundant Foreign Key Constraints in PostgreSQL Schemas
+
+**Learning:** Having multiple foreign key constraints pointing to the same referenced column (e.g., both `fk_galaxy` and `star_galaxy_id_fkey` on `star(galaxy_id) REFERENCES galaxy(galaxy_id)`) causes PostgreSQL to register multiple internal RI (referential integrity) triggers (`RI_ConstraintTrigger_c_...` and `RI_ConstraintTrigger_p_...`). Every `INSERT` and `UPDATE` on the referencing table and every `UPDATE` and `DELETE` on the referenced table runs validation checks twice, creating measurable overhead (~30% insert trigger overhead on batches) without providing additional schema guarantees.
+**Action:** Always check `information_schema.table_constraints` for duplicate foreign key definitions targeting the same foreign table/column and prune duplicates to maintain only the standard-named foreign key constraint.
