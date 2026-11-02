@@ -1,0 +1,5 @@
+# Bolt's Journal - Critical Learnings
+
+## 2026-11-02 - PostgreSQL Foreign Key Indexing and Duplicate Constraint RI Trigger Overhead
+**Learning:** In PostgreSQL, foreign keys created via `REFERENCES` constraints do not automatically receive supporting B-Tree indexes on the referencing child tables (`star.galaxy_id`, `planet.star_id`, `moon.planet_id`). Consequently, queries joining tables along foreign keys or filtering child rows by parent keys perform sequential scans ($O(N)$) rather than index lookups ($O(\log N)$). In addition, duplicate foreign key definitions referencing the exact same target column (e.g. having both `fk_galaxy` and `star_galaxy_id_fkey`) cause PostgreSQL to instantiate duplicate referential integrity triggers (`RI_ConstraintTrigger`), doubling constraint checking overhead on every insert/update/delete operation.
+**Action:** Audit relational database dumps for foreign key columns lacking B-Tree indexes and inspect `information_schema.table_constraints` to eliminate redundant duplicate foreign key definitions.
