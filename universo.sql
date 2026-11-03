@@ -460,12 +460,13 @@ ALTER TABLE ONLY public.star
 
 
 --
--- Name: star fk_galaxy; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
+-- Optimization: Index foreign key columns to speed up joins and prevent sequential scans
+-- during CASCADE / reference validation on parent deletes/updates.
 --
 
-ALTER TABLE ONLY public.star
-    ADD CONSTRAINT fk_galaxy FOREIGN KEY (galaxy_id) REFERENCES public.galaxy(galaxy_id);
-
+CREATE INDEX idx_star_galaxy_id ON public.star USING btree (galaxy_id);
+CREATE INDEX idx_planet_star_id ON public.planet USING btree (star_id);
+CREATE INDEX idx_moon_planet_id ON public.moon USING btree (planet_id);
 
 --
 -- Name: moon moon_planet_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
@@ -485,6 +486,7 @@ ALTER TABLE ONLY public.planet
 
 --
 -- Name: star star_galaxy_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
+-- Note: Redundant duplicate foreign key fk_galaxy removed to eliminate duplicate constraint checking overhead.
 --
 
 ALTER TABLE ONLY public.star
