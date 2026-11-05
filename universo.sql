@@ -460,12 +460,9 @@ ALTER TABLE ONLY public.star
 
 
 --
--- Name: star fk_galaxy; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
---
-
-ALTER TABLE ONLY public.star
-    ADD CONSTRAINT fk_galaxy FOREIGN KEY (galaxy_id) REFERENCES public.galaxy(galaxy_id);
-
+-- Performance optimization: Remove redundant duplicate FK constraint fk_galaxy on star(galaxy_id).
+-- The foreign key is already enforced by star_galaxy_id_fkey. Eliminating the duplicate removes
+-- redundant foreign key trigger verification on star inserts/updates.
 
 --
 -- Name: moon moon_planet_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
